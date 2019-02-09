@@ -51,3 +51,72 @@ sc = StandardScaler()
 X_train = sc.fit_transform(X_train)
 X_test = sc.transform(X_test)
 
+# BUILDING THE ANN
+
+# Import NN libraries
+import keras
+from keras.models import Sequential 
+from keras.layers import Dense
+
+# The ANN for churn prediction is a classifier
+
+# Initialize ANN classifier
+classifier = Sequential()
+
+# Configure the first hidden layer
+
+# Rule of thumb : no of nodes in hidden layer = average og no of i/p and no of o/ps = (11 + 1 )/2
+# units = no of nodes
+# input_dim = no of independent variables or i/p nodes
+# kernel_initializer = 'uniform' : Initialize weights using uniform distribution
+# activation = 'relu' => use rectifier function for activation
+
+classifier.add(Dense(units = 6, input_dim = 11, kernel_initializer='uniform', activation='relu'))
+
+# Configure second hidden layer ( Unnecessary)
+
+classifier.add(Dense(units = 6, activation="relu", kernel_initializer="uniform"))
+
+# Add output layer
+
+classifier.add(Dense(units = 1, kernel_initializer="uniform", activation="sigmoid"))
+
+# Compiling the ANN
+
+classifier.compile(optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['accuracy'])
+
+# Fitting ANN to training set
+
+classifier.fit(X_train, y_train, batch_size = 10, epochs = 100)
+ # ACCURACY : 83.91%
+ 
+ # MAKING PREDICTIONS AND EVALUATING THE MODEL
+ 
+ # Predict test set results
+ y_pred = classifier.predict(X_test) # is probabilities of churn
+ y_pred = (y_pred > 0.50)
+ 
+ # Make confusion matrix
+ from sklearn.metrics import confusion_matrix
+ cm = confusion_matrix(y_test, y_pred)
+ # Accuracy = (1530+150)/2000 = 84% ...yay!
+ 
+# Predict true/false for a new customer
+"""Predict if the customer with the following informations will leave the bank:
+Geography: France
+Credit Score: 600
+Gender: Male
+Age: 40
+Tenure: 3
+Balance: 60000
+Number of Products: 2
+Has Credit Card: Yes
+Is Active Member: Yes
+Estimated Salary: 50000"""
+
+new_customer = sc.transform(np.array([[0.0,0,600,1,40,3,6000,2,1,1,50000]]))
+new_prediction = classifier.predict(new_customer)
+new_prediction = (new_prediction > 0.50) 
+# false 
+
+
