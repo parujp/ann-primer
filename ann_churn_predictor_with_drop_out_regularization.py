@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sat Feb  9 09:57:35 2019
+Created on Thu Feb 14 15:46:56 2019
 
 @author: parujp
 
-Project: Customer-Churn Predictor version 2.0 using a simple ANN
+Project: Customer-Churn Predictor version 2.0 with Dropout regularization
 
-This part focuses on Evaluating, Improving and Tuning the ANN
+# Improving the ANN for higher accuracy
 
-ie: Optimizing a way to evaluate our models
+# Dropout Regularization to reduce overfitting (high variance) in deep learning
+# At each iteration of the training, some neurons of the ANN classifier are randomly disabled 
+# rate should be between 0.1 and 0.5
+
+
 
 """
 
@@ -64,20 +68,24 @@ X_test = sc.transform(X_test)
 import keras
 from keras.models import Sequential 
 from keras.layers import Dense
+from keras.layers import Dropout
 
 # Evaluating the ANN
 # Imports for KFold cross validation 
 from keras.wrappers.scikit_learn import KerasClassifier 
 from sklearn.model_selection import cross_val_score
+
 #function that builds  ANN classifier for build function expected as argument in KerasClassifier
 def build_classifier():
     # Initialize ANN classifier
     classifier = Sequential()
 
-    # Configure hidden layer
+    # Configure hidden layer with Dropout 
     classifier.add(Dense(units = 6, input_dim = 11, kernel_initializer='uniform', activation='relu'))
-    classifier.add(Dense(units = 6, activation="relu", kernel_initializer="uniform"))
+    classifier.add(Dropout(rate=0.1))
     
+    classifier.add(Dense(units = 6, activation="relu", kernel_initializer="uniform"))
+    classifier.add(Dropout(rate=0.1))
     # Add output layer
     classifier.add(Dense(units = 1, kernel_initializer="uniform", activation="sigmoid"))
 
@@ -91,16 +99,7 @@ classifier = KerasClassifier(build_fn = build_classifier, batch_size = 10, epoch
 #n_jobs = no of CPUs to do the computation. -1 means all CPUs (run llel computations)
 accuracies = cross_val_score(estimator = classifier, X = X_train, y = y_train, cv = 10, n_jobs = -1)    
 
-mean = accuracies.mean() # 84.162 % 
-variance = accuracies.std() # 2% -> high variance?
-
-# Improving the ANN for higher accuracy
-
-# Dropout Regularization to reduce overfitting (high variance)
-
-# At each iteration of the training, some neurons of the ANN classifier are randomly disabled 
-
-
-
+mean = accuracies.mean() # 83.6%
+variance = accuracies.std() # 1%
 
 
